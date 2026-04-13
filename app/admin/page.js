@@ -144,6 +144,8 @@ export default function AdminPanel() {
                 <div><label style={{display:"block",fontSize:13,fontWeight:600,color:"var(--muted)",marginBottom:6}}>Category</label><select value={form.category||""} onChange={e=>setForm(p=>({...p,category:e.target.value}))} style={is}>{CATEGORIES.filter(c=>c!=="All").map(cat=><option key={cat} value={cat}>{cat}</option>)}</select></div>
               </div>
               <label style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer"}}><input type="checkbox" checked={form.inStock!==false} onChange={e=>setForm(p=>({...p,inStock:e.target.checked}))} style={{accentColor:"var(--accent)",width:18,height:18}}/><span style={{fontSize:14,fontWeight:500}}>In Stock</span></label>
+              <label style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer",marginTop:8}}><input type="checkbox" checked={form.noDiscount===true} onChange={e=>setForm(p=>({...p,noDiscount:e.target.checked}))} style={{accentColor:"var(--red)",width:18,height:18}}/><span style={{fontSize:14,fontWeight:500}}>No Additional Discounts</span></label>
+              <p style={{fontSize:11,color:"var(--dim)",marginTop:2}}>When checked, automatic bulk cart discounts will not apply to this item. Customers will see a notice.</p>
             </div>
             <h3 style={{fontSize:14,fontWeight:600,color:"var(--muted)",marginBottom:16,textTransform:"uppercase",borderTop:"1px solid var(--border)",paddingTop:20}}>Product Details</h3>
             <div style={{display:"grid",gap:16}}>
