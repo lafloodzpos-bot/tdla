@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { BULK_DISCOUNTS, SITE_TAGLINE, SITE_DESCRIPTION, SITE_NAME, CATEGORIES, SHIPPING_OPTIONS, PAYMENT_METHODS, fmt, genOrderNum } , BULK_DISCOUNTS } from "@/lib/config";
+import { BULK_DISCOUNTS, SITE_TAGLINE, SITE_DESCRIPTION, SITE_NAME, CATEGORIES, SHIPPING_OPTIONS, PAYMENT_METHODS, fmt, genOrderNum } from "@/lib/config";
 
 function Stars({ rating, label }) {
   if (!rating) return null;
