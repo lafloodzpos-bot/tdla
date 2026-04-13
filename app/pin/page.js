@@ -48,14 +48,14 @@ export default function PinWall() {
   if (checking) return <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#0a0a0f"}}><p style={{color:"#666"}}>Loading...</p></div>;
   if (disabled) return (
     <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#0a0a0f",padding:24}}>
-      <div style={{textAlign:"center"}}><div style={{width:56,height:56,borderRadius:14,background:"linear-gradient(135deg,#6c5ce7,#8b5cf6)",display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:28,fontWeight:800,color:"#fff",marginBottom:16}}>A</div><h1 style={{fontFamily:"'Outfit',sans-serif",fontSize:28,fontWeight:700,color:"#fff",marginBottom:12}}>TDLA Private</h1><p style={{color:"#666",fontSize:16}}>This site is currently unavailable.</p></div>
+      <div style={{textAlign:"center"}}><div style={{width:56,height:56,borderRadius:14,background:"linear-gradient(135deg,#6c5ce7,#8b5cf6)",display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:20,fontWeight:800,color:"#fff",marginBottom:16}}>TD</div><h1 style={{fontFamily:"'Outfit',sans-serif",fontSize:28,fontWeight:700,color:"#fff",marginBottom:12}}>TDLA Private</h1><p style={{color:"#666",fontSize:16}}>This site is currently unavailable.</p></div>
     </div>
   );
 
   return (
     <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:"#0a0a0f",padding:24,userSelect:"none",WebkitUserSelect:"none"}}>
       <div style={{textAlign:"center",marginBottom:32}}>
-        <div style={{width:56,height:56,borderRadius:14,background:"linear-gradient(135deg,#6c5ce7,#8b5cf6)",display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:28,fontWeight:800,color:"#fff",marginBottom:16}}>A</div>
+        <div style={{width:56,height:56,borderRadius:14,background:"linear-gradient(135deg,#6c5ce7,#8b5cf6)",display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:20,fontWeight:800,color:"#fff",marginBottom:16}}>TD</div>
         <h1 style={{fontFamily:"'Outfit',sans-serif",fontSize:26,fontWeight:700,color:"#fff",marginBottom:8}}>TDLA Private</h1>
         <p style={{color:"#666",fontSize:14}}>Please type pin to access</p>
       </div>
