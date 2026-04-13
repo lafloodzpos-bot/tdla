@@ -10,6 +10,8 @@ export default function AdminSettings() {
   const [adminLogs, setAdminLogs] = useState([]);
   const [siteEnabled, setSiteEnabled] = useState(true);
   const [publicAccess, setPublicAccess] = useState(false);
+  const [telegramLink, setTelegramLink] = useState("");
+  const [signalLink, setSignalLink] = useState("");
   const [newName, setNewName] = useState("");
   const [newPin, setNewPin] = useState("");
   const [newAdminPass, setNewAdminPass] = useState("");
@@ -29,6 +31,8 @@ export default function AdminSettings() {
     setAdminLogs(data.adminLogs||[]);
     setSiteEnabled(data.siteEnabled!==false);
     setPublicAccess(data.publicAccess===true);
+    setTelegramLink(data.telegramLink||"");
+    setSignalLink(data.signalLink||"");
     setAuthed(true);
     // Log admin login
     fetch("/api/settings",{method:"POST",headers:{"x-admin-password":password,"Content-Type":"application/json"},body:JSON.stringify({action:"log_admin"})});
@@ -100,6 +104,20 @@ export default function AdminSettings() {
     setLogs([]);flash("Logs cleared");
   };
 
+  const saveTelegram = async () => {
+    const link = telegramLink.trim();
+    if (link && !link.startsWith("https://")) { flash("Link must start with https://","error"); return; }
+    await fetch("/api/settings",{method:"POST",headers:{"x-admin-password":password,"Content-Type":"application/json"},body:JSON.stringify({action:"set_telegram",link})});
+    setTelegramLink(link);
+    flash(link ? "Telegram link saved!" : "Telegram link removed");
+  };
+  const saveSignal = async () => {
+    const link = signalLink.trim();
+    if (link && !link.startsWith("https://")) { flash("Link must start with https://","error"); return; }
+    await fetch("/api/settings",{method:"POST",headers:{"x-admin-password":password,"Content-Type":"application/json"},body:JSON.stringify({action:"set_signal",link})});
+    setSignalLink(link);
+    flash(link ? "Signal link saved!" : "Signal link removed");
+  };
   const clearAdminLogs = async () => {
     if(!confirm("Clear all admin logs?"))return;
     await fetch("/api/settings",{method:"POST",headers:{"x-admin-password":password,"Content-Type":"application/json"},body:JSON.stringify({action:"clear_admin_logs"})});
@@ -144,6 +162,28 @@ export default function AdminSettings() {
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12}}>
             <div><h3 style={{fontSize:16,fontWeight:700,marginBottom:4}}>Public Access</h3><p style={{fontSize:13,color:"var(--muted)"}}>{publicAccess?"Anyone can browse without a PIN":"Customers need a PIN to access the store"}</p></div>
             <button onClick={togglePublic} style={{...bs(publicAccess?"var(--border)":"var(--green)"),color:publicAccess?"var(--muted)":"#fff",padding:"12px 24px",fontSize:14,minWidth:160}}>{publicAccess?"Require PIN":"Make Public"}</button>
+          </div>
+        </div>
+
+        {/* MESSAGING LINKS */}
+        <div style={{background:"var(--card)",borderRadius:14,padding:20,border:"1px solid var(--border)",marginBottom:24}}>
+          <h3 style={{fontSize:16,fontWeight:700,marginBottom:16}}>Messaging Links</h3>
+          <p style={{fontSize:12,color:"var(--dim)",marginBottom:16}}>These links are shown to customers on the storefront and used in the checkout buttons. Must start with https://</p>
+          <div style={{display:"grid",gap:16}}>
+            <div>
+              <label style={{display:"block",fontSize:13,fontWeight:600,color:"var(--muted)",marginBottom:6}}>Telegram DM Link</label>
+              <div style={{display:"flex",gap:8}}>
+                <input value={telegramLink} onChange={e=>setTelegramLink(e.target.value)} placeholder="https://t.me/yourusername" style={{...is,flex:1}}/>
+                <button onClick={saveTelegram} style={bs()}>Save</button>
+              </div>
+            </div>
+            <div>
+              <label style={{display:"block",fontSize:13,fontWeight:600,color:"var(--muted)",marginBottom:6}}>Signal DM Link</label>
+              <div style={{display:"flex",gap:8}}>
+                <input value={signalLink} onChange={e=>setSignalLink(e.target.value)} placeholder="https://signal.me/#p/..." style={{...is,flex:1}}/>
+                <button onClick={saveSignal} style={bs()}>Save</button>
+              </div>
+            </div>
           </div>
         </div>
 
