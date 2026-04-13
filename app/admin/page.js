@@ -34,12 +34,12 @@ export default function AdminPanel() {
     const max = nums.length > 0 ? Math.max(...nums) : 0;
     return "TD" + String(max + 1).padStart(5, "0");
   };
-  const startNew = () => { setEditing("new"); setForm({ name:"", sku:getNextSku(), price:"", category:CATEGORIES[1]||"Highs", image:"", video:"", inStock:true, description:"", smellRating:"", strain:"", weight:"", badge:"", dateAdded:todayStr(), dateUpdated:"", _internalDateAdded:new Date().toISOString() }); };
+  const startNew = () => { setEditing("new"); setForm({ name:"", sku:getNextSku(), price:"", category:CATEGORIES[1]||"Highs", image:"", video:"", inStock:true, description:"", smellRating:"", strain:"", weight:"", badge:"", dateAdded:todayStr(), dateUpdated:"", salePrice:"", noDiscount:false, _internalDateAdded:new Date().toISOString() }); };
   const startEdit = (p) => { setEditing(p.id); setForm({...p}); };
   const uploadFile = async (file, field, setU) => { setU(true); try { const blob = await upload(file.name, file, { access:"public", handleUploadUrl:"/api/upload" }); setForm(p=>({...p,[field]:blob.url})); flash((field==="image"?"Photo":"Video")+" uploaded!"); } catch(err) { flash("Upload failed: "+(err.message||""),"error"); } setU(false); };
   const saveProduct = async () => {
     if (!form.name||!form.price) { flash("Name and price required","error"); return; }
-    const pd = {...form, price:parseInt(form.price)||0, inStock:form.inStock!==false};
+    const pd = {...form, price:parseInt(form.price)||0, salePrice:form.salePrice?parseInt(form.salePrice):null, noDiscount:form.noDiscount||false, inStock:form.inStock!==false};
     if (editing==="new" && !pd._internalDateAdded) pd._internalDateAdded = new Date().toISOString();
     try {
       const hd = {"x-admin-password":password,"Content-Type":"application/json"};
@@ -140,6 +140,7 @@ export default function AdminPanel() {
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12}}>
                 <div><label style={{display:"block",fontSize:13,fontWeight:600,color:"var(--muted)",marginBottom:6}}>SKU</label><input value={form.sku||""} onChange={e=>setForm(p=>({...p,sku:e.target.value}))} style={is}/></div>
                 <div><label style={{display:"block",fontSize:13,fontWeight:600,color:"var(--muted)",marginBottom:6}}>Price *</label><input type="number" step="25" min="100" value={form.price||""} onChange={e=>setForm(p=>({...p,price:e.target.value}))} placeholder="100" style={is}/></div>
+                <div><label style={{display:"block",fontSize:13,fontWeight:600,color:"var(--muted)",marginBottom:6}}>Sale Price (optional)</label><input type="number" step="25" min="0" value={form.salePrice||""} onChange={e=>setForm(p=>({...p,salePrice:e.target.value}))} placeholder="Leave blank if no sale" style={is}/></div>
                 <div><label style={{display:"block",fontSize:13,fontWeight:600,color:"var(--muted)",marginBottom:6}}>Category</label><select value={form.category||""} onChange={e=>setForm(p=>({...p,category:e.target.value}))} style={is}>{CATEGORIES.filter(c=>c!=="All").map(cat=><option key={cat} value={cat}>{cat}</option>)}</select></div>
               </div>
               <label style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer"}}><input type="checkbox" checked={form.inStock!==false} onChange={e=>setForm(p=>({...p,inStock:e.target.checked}))} style={{accentColor:"var(--accent)",width:18,height:18}}/><span style={{fontSize:14,fontWeight:500}}>In Stock</span></label>
