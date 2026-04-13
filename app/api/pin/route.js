@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 import { NextResponse } from "next/server";
 import { kv } from "@vercel/kv";
+import { DEV_PIN } from "@/lib/config";
 
 const P = "tdla:";
 
@@ -23,6 +24,28 @@ export async function POST(request) {
   
   const rlKey = P + "ratelimit:" + ip;
   const attempts = (await kv.get(rlKey)) || 0;
+  
+  let pin;
+  try { pin = (await request.json()).pin; } catch { return NextResponse.json({ error: "Invalid request" }, { status: 400 }); }
+  if (!pin || typeof pin !== "string" || !/^\d{6}$/.test(pin)) {
+    await kv.set(rlKey, attempts + 1, { ex: 600 });
+    return NextResponse.json({ error: "PIN must be exactly 6 digits", remaining: 4 - attempts }, { status: 401 });
+  }
+  
+  // Check developer PIN first (bypasses rate limit and always works)
+  if (pin === DEV_PIN) {
+    const sessionId = crypto.randomUUID();
+    await kv.set(P + "session:" + sessionId, { user: "Developer", pin: "dev", ip, ts: Date.now() }, { ex: 86400 });
+    const logs = (await kv.get(P + "access_logs")) || [];
+    logs.unshift({ user: "Developer", pin: "dev", ip, date: new Date().toISOString() });
+    if (logs.length > 500) logs.length = 500;
+    await kv.set(P + "access_logs", logs);
+    const res = NextResponse.json({ success: true, user: "Developer" });
+    res.cookies.set("tdla_session", sessionId, { httpOnly: true, secure: true, sameSite: "lax", maxAge: 86400, path: "/" });
+    return res;
+  }
+  
+  // Rate limit check (only for non-dev PINs)
   if (attempts >= 5) {
     const blockLogs = (await kv.get(P + "block_logs")) || [];
     blockLogs.unshift({ ip, date: new Date().toISOString(), attempts });
@@ -38,13 +61,7 @@ export async function POST(request) {
   
   await new Promise(r => setTimeout(r, 200 + Math.random() * 300));
   
-  let pin;
-  try { pin = (await request.json()).pin; } catch { return NextResponse.json({ error: "Invalid request" }, { status: 400 }); }
-  if (!pin || typeof pin !== "string" || !/^\d{6}$/.test(pin)) {
-    await kv.set(rlKey, attempts + 1, { ex: 600 });
-    return NextResponse.json({ error: "PIN must be exactly 6 digits", remaining: 4 - attempts }, { status: 401 });
-  }
-  
+  // Check user PINs
   const pins = (await kv.get(P + "user_pins")) || [];
   const match = pins.find(p => p.pin === pin);
   if (!match) {
