@@ -29,7 +29,12 @@ export default function AdminPanel() {
   const flash = (text, type = "success") => { setMessage({ text, type }); setTimeout(() => setMessage(null), 3000); };
   const loadProducts = async () => { setLoading(true); try { const res = await fetch("/api/products"); const data = await res.json(); data.sort((a,b)=>{ const da=a._internalDateAdded||""; const db=b._internalDateAdded||""; return db.localeCompare(da); }); setProducts(data); } catch { flash("Failed to load","error"); } setLoading(false); };
   const login = () => { fetch("/api/settings",{headers:{"x-admin-password":password}}).then(r=>{if(r.ok){setAuthed(true);loadProducts();}else{flash("Wrong password","error");}}).catch(()=>flash("Error","error")); };
-  const startNew = () => { setEditing("new"); setForm({ name:"", sku:"QP"+Math.floor(10000+Math.random()*90000), price:"", category:CATEGORIES[1]||"Highs", image:"", video:"", inStock:true, description:"", smellRating:"", strain:"", weight:"", badge:"", dateAdded:todayStr(), dateUpdated:"", _internalDateAdded:new Date().toISOString() }); };
+  const getNextSku = () => {
+    const nums = products.map(p => { const m = (p.sku||"").match(/^TD(\d+)$/); return m ? parseInt(m[1]) : 0; });
+    const max = nums.length > 0 ? Math.max(...nums) : 0;
+    return "TD" + String(max + 1).padStart(5, "0");
+  };
+  const startNew = () => { setEditing("new"); setForm({ name:"", sku:getNextSku(), price:"", category:CATEGORIES[1]||"Highs", image:"", video:"", inStock:true, description:"", smellRating:"", strain:"", weight:"", badge:"", dateAdded:todayStr(), dateUpdated:"", _internalDateAdded:new Date().toISOString() }); };
   const startEdit = (p) => { setEditing(p.id); setForm({...p}); };
   const uploadFile = async (file, field, setU) => { setU(true); try { const blob = await upload(file.name, file, { access:"public", handleUploadUrl:"/api/upload" }); setForm(p=>({...p,[field]:blob.url})); flash((field==="image"?"Photo":"Video")+" uploaded!"); } catch(err) { flash("Upload failed: "+(err.message||""),"error"); } setU(false); };
   const saveProduct = async () => {
