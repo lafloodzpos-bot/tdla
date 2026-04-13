@@ -13,6 +13,8 @@ export default function PinWall() {
   const [shake, setShake] = useState(false);
 
   useEffect(() => {
+    window.onpageshow = (e) => { if(e.persisted){setPin("");setError("");setBlocked(false);} };
+    setPin("");setError("");setBlocked(false);//mount-clear
     fetch("/api/pin").then(r=>r.json()).then(d=>{
       if (d.authed || d.public) { window.location.href="/shop"; }
       else if (!d.enabled) { setDisabled(true); }
