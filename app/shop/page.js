@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { SITE_TAGLINE, SITE_DESCRIPTION, SITE_NAME, CATEGORIES, SHIPPING_OPTIONS, PAYMENT_METHODS, fmt, genOrderNum } from "@/lib/config";
+import { BULK_DISCOUNTS, SITE_TAGLINE, SITE_DESCRIPTION, SITE_NAME, CATEGORIES, SHIPPING_OPTIONS, PAYMENT_METHODS, fmt, genOrderNum } , BULK_DISCOUNTS } from "@/lib/config";
 
 function Stars({ rating, label }) {
   if (!rating) return null;
@@ -34,7 +34,19 @@ export default function StoreFront() {
   useEffect(() => { setSlide(0); setVideoPlaying(false); }, [sel]);
 
   const cc = cart.reduce((s,i)=>s+i.qty,0);
-  const sub = cart.reduce((s,i)=>s+i.price*i.qty,0);
+  const sub = cart.reduce((s,i)=>s+getEffectivePrice(i)*i.qty,0);
+  // Calculate bulk discount
+  const totalItems = cart.reduce((s,i)=>s+i.qty,0);
+  const activeTier = [...BULK_DISCOUNTS].reverse().find(t=>totalItems>=t.minItems);
+  const bulkDiscount = activeTier ? activeTier.discount : 0;
+  const bulkLabel = activeTier ? activeTier.label : "";
+  
+  // Calculate effective price per item (sale price > bulk discount > regular price)
+  const getEffectivePrice = (item) => {
+    const basePrice = item.salePrice || item.price;
+    if (item.noDiscount || !bulkDiscount) return basePrice;
+    return Math.max(0, basePrice - bulkDiscount);
+  };
   const so = SHIPPING_OPTIONS.find(o=>o.id===shipping);
   const po = PAYMENT_METHODS.find(o=>o.id===payment);
   const fee = sub*(po.fee/100);
@@ -48,8 +60,8 @@ export default function StoreFront() {
   const handleSwipeEnd = (e, hasV, hasI) => { if(!touchStart.current)return; const diff=touchStart.current-e.changedTouches[0].clientX; if(Math.abs(diff)>50){if(diff>0&&hasV&&slide===0)setSlide(1);if(diff<0&&hasI&&slide===1)setSlide(0);} touchStart.current=null; };
 
   const orderText = () => {
-    const items = cart.map(i=>`${i.qty}-${i.name} (${po.label}) [SKU: ${i.sku}] [${fmt(i.price)}]=${fmt(i.price*i.qty)}`).join("\n");
-    return `ORDER REQUEST\n\nITEMS:\n${items}\n\nORDER SUMMARY\n-------------\nTotal Items: ${cc}\nSubtotal: ${fmt(sub)}\nShipping (${so.label}): ${fmt(so.price)}\nPayment: ${po.label}\nTotal due = ${fmt(tot)}\n${shipping==="free"?"FREE SHIPPING (UPS 2 Day Air / USPS Priority)":"OVERNIGHT NEXT DAY SHIPPING (+$50)"}\nOrder Number: ${genOrderNum()}\n\nShipping address will be collected after payment is processed.`;
+    const items = cart.map(i=>`${i.qty}-${i.name} (${po.label}) [SKU: ${i.sku}] [${fmt(getEffectivePrice(i))}${i.salePrice?" SALE":""}${bulkDiscount>0&&!i.noDiscount?" -"+fmt(bulkDiscount)+" disc":""}]=${fmt(getEffectivePrice(i)*i.qty)}`).join("\n");
+    return `ORDER REQUEST\n\nITEMS:\n${items}\n\nORDER SUMMARY\n-------------\nTotal Items: ${cc}\nSubtotal: ${fmt(sub)}\nShipping (${so.label}): ${fmt(so.price)}\nPayment: ${po.label}\nTotal due = ${fmt(tot)}\n${shipping==="free"?"FREE SHIPPING (UPS 2 Day Air / USPS Priority)":"OVERNIGHT NEXT DAY SHIPPING (+$50)"}\nOrder Number: ${genOrderNum()}\n\nShipping address will be collected after payment is processed.\n\n${bulkLabel?"BULK DISCOUNT APPLIED: "+bulkLabel+"\n":""}NOTE: This total is not final. Please message us to confirm the total. This is just an estimate.`;
   };
   const copyOrd = async () => { try{await navigator.clipboard.writeText(orderText());}catch{const t=document.createElement("textarea");t.value=orderText();document.body.appendChild(t);t.select();document.execCommand("copy");document.body.removeChild(t);} setCopied(true);setTimeout(()=>setCopied(false),3000); };
   const is = {padding:"12px 16px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text)",fontSize:14,outline:"none",width:"100%"};
@@ -107,7 +119,8 @@ export default function StoreFront() {
             <div style={{padding:14,overflowY:"auto",flex:1}}>
               <p style={{fontSize:10,color:"var(--dim)",fontWeight:600,letterSpacing:".06em"}}>SKU: {sel.sku} - {sel.category}</p>
               <h2 style={{fontSize:16,fontWeight:700,marginTop:2,marginBottom:4}}>{sel.name}</h2>
-              <span style={{fontFamily:"'Outfit'",fontSize:20,fontWeight:800,color:"var(--accent)"}}>{fmt(sel.price)}</span>
+              <span style={{fontFamily:"'Outfit'",fontWeight:800,color:"var(--accent)"}}>{sel.salePrice?<><span style={{fontSize:14,textDecoration:"line-through",color:"var(--dim)",marginRight:6}}>{fmt(sel.price)}</span><span style={{fontSize:20}}>{fmt(sel.salePrice)}</span></>:<span style={{fontSize:20}}>{fmt(sel.price)}</span>}</span>
+              {sel.noDiscount&&<span style={{display:"inline-block",marginLeft:8,background:"var(--surface)",border:"1px solid var(--border)",color:"var(--dim)",padding:"2px 8px",borderRadius:6,fontSize:10}}>No additional discounts</span>}
               {sel.inStock===false&&<span style={{display:"inline-block",marginLeft:10,background:"var(--red)",color:"#fff",padding:"2px 10px",borderRadius:6,fontSize:11,fontWeight:700}}>SOLD OUT</span>}
               {sel.description&&<p style={{color:"var(--muted)",fontSize:12,lineHeight:1.5,marginTop:8,marginBottom:8}}>{sel.description}</p>}
               <div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:8,marginBottom:12}}>
@@ -147,7 +160,7 @@ export default function StoreFront() {
                 {product.badge&&inS&&<span style={{position:"absolute",top:10,right:10,background:product.badge==="HOT"?"var(--red)":product.badge==="NEW"?"var(--accent)":product.badge==="SALE"?"var(--green)":"var(--gold)",color:"#fff",fontSize:10,fontWeight:700,padding:"3px 10px",borderRadius:6}}>{product.badge}</span>}
               </div>
               <div style={{padding:"14px 16px 16px"}}><p style={{fontSize:10,color:"var(--dim)",fontWeight:600,letterSpacing:".06em",marginBottom:3}}>SKU: {product.sku}</p><h3 style={{fontSize:14,fontWeight:600,marginBottom:8,lineHeight:1.3,minHeight:36}}>{product.name}</h3>
-                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}><span style={{fontFamily:"'Outfit'",fontSize:20,fontWeight:700,color:"var(--accent)"}}>{fmt(product.price)}</span>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}><span style={{fontFamily:"'Outfit'",fontWeight:700,color:"var(--accent)"}}>{product.salePrice?<><span style={{fontSize:14,textDecoration:"line-through",color:"var(--dim)",marginRight:6}}>{fmt(product.price)}</span><span style={{fontSize:20}}>{fmt(product.salePrice)}</span></>:<span style={{fontSize:20}}>{fmt(product.price)}</span>}</span>
                   <button onClick={e=>{e.stopPropagation();inS&&addToCart(product);}} style={{padding:"8px 16px",borderRadius:10,border:"none",background:inS?"linear-gradient(135deg,var(--accent),#8b5cf6)":"var(--border)",color:"#fff",fontSize:12,fontWeight:600,cursor:inS?"pointer":"default"}}>{!inS?"Sold Out":addedId===product.id?"Added!":"Add to Cart"}</button>
                 </div>
               </div>
@@ -157,6 +170,7 @@ export default function StoreFront() {
         {page==="cart"&&<div style={{maxWidth:800,margin:"0 auto"}}>
           <button onClick={()=>setPage("shop")} style={{background:"none",border:"none",color:"var(--muted)",cursor:"pointer",fontSize:14,marginBottom:20}}>Back to Shop</button>
           <h2 style={{fontFamily:"'Outfit'",fontSize:28,fontWeight:700,marginBottom:24}}>Your Cart</h2>
+          {bulkLabel&&<div style={{background:"rgba(34,197,94,.1)",border:"1px solid var(--green)",borderRadius:10,padding:"10px 16px",marginBottom:16,fontSize:13,color:"var(--green)",fontWeight:600}}>{bulkLabel} applied!</div>}
           {cart.length===0?<div style={{textAlign:"center",padding:"60px 20px",background:"var(--surface)",borderRadius:16,border:"1px solid var(--border)"}}><p style={{color:"var(--muted)",fontSize:16,marginBottom:20}}>Your cart is empty</p><button onClick={()=>setPage("shop")} style={{padding:"12px 28px",borderRadius:10,border:"none",background:"var(--accent)",color:"#fff",fontSize:14,fontWeight:600,cursor:"pointer"}}>Browse Products</button></div>
           :<>
             <div style={{display:"flex",flexDirection:"column",gap:12,marginBottom:24}}>
@@ -168,7 +182,7 @@ export default function StoreFront() {
                   <span style={{fontSize:15,fontWeight:600,minWidth:20,textAlign:"center"}}>{item.qty}</span>
                   <button onClick={()=>updateQty(item.id,1)} style={{width:30,height:30,borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text)",cursor:"pointer",fontSize:15,display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>
                 </div>
-                <span style={{fontFamily:"'Outfit'",fontWeight:700,fontSize:16,minWidth:80,textAlign:"right"}}>{fmt(item.price*item.qty)}</span>
+                <span style={{fontFamily:"'Outfit'",fontWeight:700,fontSize:16,minWidth:80,textAlign:"right"}}>{fmt(getEffectivePrice(item)*item.qty)}{bulkDiscount>0&&!item.noDiscount&&<span style={{display:"block",fontSize:10,color:"var(--green)"}}>-{fmt(bulkDiscount)}/ea</span>}{item.noDiscount&&bulkDiscount>0&&<span style={{display:"block",fontSize:10,color:"var(--dim)"}}>No disc.</span>}</span>
                 <button onClick={()=>rmCart(item.id)} style={{background:"transparent",border:"none",color:"var(--dim)",cursor:"pointer",padding:4,fontSize:16}}>X</button>
               </div>))}
             </div>
