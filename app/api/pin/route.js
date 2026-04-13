@@ -1,33 +1,35 @@
 import { NextResponse } from "next/server";
 import { kv } from "@vercel/kv";
 
+const P = "tdla:";
+
 export async function GET(request) {
-  const session = request.cookies.get("ap_session")?.value;
-  const siteEnabled = await kv.get("site_enabled");
+  const session = request.cookies.get("tdla_session")?.value;
+  const siteEnabled = await kv.get(P + "site_enabled");
   if (siteEnabled === false) return NextResponse.json({ enabled: false, authed: false, public: false });
-  const pub = await kv.get("public_access");
+  const pub = await kv.get(P + "public_access");
   if (pub === true) return NextResponse.json({ enabled: true, authed: true, public: true });
   if (!session) return NextResponse.json({ enabled: true, authed: false, public: false });
-  const valid = await kv.get("session:" + session);
+  const valid = await kv.get(P + "session:" + session);
   return NextResponse.json({ enabled: true, authed: !!valid, public: false });
 }
 
 export async function POST(request) {
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "unknown";
-  const siteEnabled = await kv.get("site_enabled");
+  const siteEnabled = await kv.get(P + "site_enabled");
   if (siteEnabled === false) return NextResponse.json({ error: "Site is currently disabled" }, { status: 403 });
   
-  const rlKey = "ratelimit:" + ip;
+  const rlKey = P + "ratelimit:" + ip;
   const attempts = (await kv.get(rlKey)) || 0;
   if (attempts >= 5) {
-    const blockLogs = (await kv.get("block_logs")) || [];
+    const blockLogs = (await kv.get(P + "block_logs")) || [];
     blockLogs.unshift({ ip, date: new Date().toISOString(), attempts });
     if (blockLogs.length > 200) blockLogs.length = 200;
-    await kv.set("block_logs", blockLogs);
+    await kv.set(P + "block_logs", blockLogs);
     return NextResponse.json({ error: "Too many attempts. Try again in 10 minutes.", blocked: true }, { status: 429 });
   }
   
-  const globalKey = "ratelimit:global:" + Math.floor(Date.now() / 60000);
+  const globalKey = P + "ratelimit:global:" + Math.floor(Date.now() / 60000);
   const globalAttempts = (await kv.get(globalKey)) || 0;
   if (globalAttempts >= 30) return NextResponse.json({ error: "Too many attempts. Try again shortly.", blocked: true }, { status: 429 });
   await kv.set(globalKey, globalAttempts + 1, { ex: 120 });
@@ -41,7 +43,7 @@ export async function POST(request) {
     return NextResponse.json({ error: "PIN must be exactly 6 digits", remaining: 4 - attempts }, { status: 401 });
   }
   
-  const pins = (await kv.get("user_pins")) || [];
+  const pins = (await kv.get(P + "user_pins")) || [];
   const match = pins.find(p => p.pin === pin);
   if (!match) {
     await kv.set(rlKey, attempts + 1, { ex: 600 });
@@ -49,14 +51,14 @@ export async function POST(request) {
   }
   
   const sessionId = crypto.randomUUID();
-  await kv.set("session:" + sessionId, { user: match.name, pin: match.pin, ip, ts: Date.now() }, { ex: 86400 });
-  const logs = (await kv.get("access_logs")) || [];
+  await kv.set(P + "session:" + sessionId, { user: match.name, pin: match.pin, ip, ts: Date.now() }, { ex: 86400 });
+  const logs = (await kv.get(P + "access_logs")) || [];
   logs.unshift({ user: match.name, pin: match.pin, ip, date: new Date().toISOString() });
   if (logs.length > 500) logs.length = 500;
-  await kv.set("access_logs", logs);
+  await kv.set(P + "access_logs", logs);
   await kv.del(rlKey);
   
   const res = NextResponse.json({ success: true, user: match.name });
-  res.cookies.set("ap_session", sessionId, { httpOnly: true, secure: true, sameSite: "lax", maxAge: 86400, path: "/" });
+  res.cookies.set("tdla_session", sessionId, { httpOnly: true, secure: true, sameSite: "lax", maxAge: 86400, path: "/" });
   return res;
 }
