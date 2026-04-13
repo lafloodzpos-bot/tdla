@@ -1,11 +1,14 @@
-import { kv } from "@vercel/kv";
 import { NextResponse } from "next/server";
-import { getProducts, addProduct, updateProduct, deleteProduct } from "@/lib/db";
+import { kv } from "@vercel/kv";
 import { ADMIN_PASSWORD as DEFAULT_PASSWORD } from "@/lib/config";
+import { getProducts, addProduct, updateProduct, deleteProduct } from "@/lib/db";
 
-function isAuthed(request) {
+const P = "tdla:";
+
+async function checkAdmin(request) {
   const pw = request.headers.get("x-admin-password");
-  return pw === ADMIN_PASSWORD;
+  const customPw = await kv.get(P + "admin_password");
+  return pw === (customPw || DEFAULT_PASSWORD);
 }
 
 export async function GET() {
@@ -14,39 +17,26 @@ export async function GET() {
 }
 
 export async function POST(request) {
-  if (!isAuthed(request)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!(await checkAdmin(request))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const body = await request.json();
-  if (!body.name || body._test) {
-    return NextResponse.json({ error: "Valid product name required" }, { status: 400 });
-  }
   const product = await addProduct(body);
-  return NextResponse.json(product, { status: 201 });
+  return NextResponse.json(product);
 }
 
 export async function PUT(request) {
-  if (!isAuthed(request)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!(await checkAdmin(request))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const body = await request.json();
   const { id, ...updates } = body;
   const product = await updateProduct(id, updates);
-  if (!product) {
-    return NextResponse.json({ error: "Product not found" }, { status: 404 });
-  }
+  if (!product) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json(product);
 }
 
 export async function DELETE(request) {
-  if (!isAuthed(request)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!(await checkAdmin(request))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
-  const success = await deleteProduct(id);
-  if (!success) {
-    return NextResponse.json({ error: "Product not found" }, { status: 404 });
-  }
+  const result = await deleteProduct(id);
+  if (!result) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json({ success: true });
 }
