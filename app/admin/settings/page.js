@@ -242,7 +242,7 @@ export default function AdminSettings() {
           {adminLogs.length===0&&<p style={{color:"var(--dim)",fontSize:13,textAlign:"center",padding:20}}>No admin login logs yet.</p>}
           <div style={{maxHeight:300,overflowY:"auto",display:"flex",flexDirection:"column",gap:6}}>
             {adminLogs.map((log,i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",background:"var(--surface)",borderRadius:6,fontSize:12,flexWrap:"wrap",gap:4}}>
-              <span style={{fontWeight:600,color:"var(--text)"}}>Admin Login</span>
+              <span style={{fontWeight:600,color:"var(--text)"}}>{log.type||"Admin"} Login</span>
               <span style={{color:"var(--dim)"}}>IP: {log.ip}</span>
               <span style={{color:"var(--dim)"}}>{new Date(log.date).toLocaleString("en-US",{month:"2-digit",day:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})}</span>
             </div>))}
