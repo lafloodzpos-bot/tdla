@@ -167,8 +167,8 @@ export default function AdminPanel() {
             {/* Telegram notification */}
             <div style={{marginTop:24,paddingTop:20,borderTop:"1px solid var(--border)"}}>
               <label style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer",marginBottom:12}}>
-                <input type="checkbox" checked={!!form.sendTelegram} onChange={e=>{const ck=e.target.checked;setForm(p=>{const msg=editing==="new"?"🆕 NEW DROP\n\n"+(p.name||"Product")+"\nSKU: "+(p.sku||"")+"\nPrice: $"+(p.price||"0"):"🔄 UPDATE\n\n"+(p.name||"Product")+"\nSKU: "+(p.sku||"")+"\nPrice: $"+(p.price||"0");return{...p,sendTelegram:ck,telegramMessage:ck?(p.telegramMessage||msg):p.telegramMessage};});}} style={{accentColor:"var(--accent)",width:18,height:18}}/>
-                <span style={{fontSize:14,fontWeight:600}}>📢 Send Telegram announcement on save</span>
+                <input type="checkbox" checked={!!form.sendTelegram} onChange={e=>{const ck=e.target.checked;setForm(p=>{const msg=editing==="new"?"ð NEW DROP\n\n"+(p.name||"Product")+"\nSKU: "+(p.sku||"")+"\nPrice: $"+(p.price||"0"):"ð UPDATE\n\n"+(p.name||"Product")+"\nSKU: "+(p.sku||"")+"\nPrice: $"+(p.price||"0");return{...p,sendTelegram:ck,telegramMessage:ck?(p.telegramMessage||msg):p.telegramMessage};});}} style={{accentColor:"var(--accent)",width:18,height:18}}/>
+                <span style={{fontSize:14,fontWeight:600}}>ð¢ Send Telegram announcement on save</span>
               </label>
               {form.sendTelegram&&<textarea value={form.telegramMessage||""} onChange={e=>setForm(p=>({...p,telegramMessage:e.target.value}))} rows={5} placeholder="Message to send..." style={{...is,resize:"vertical"}}/>}
             </div>
@@ -209,7 +209,7 @@ export default function AdminPanel() {
                 <div style={{display:"flex",alignItems:"end"}}><label style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer",padding:"10px 0"}}><input type="checkbox" checked={annForm.active!==false} onChange={e=>setAnnForm(p=>({...p,active:e.target.checked}))} style={{accentColor:"var(--accent)",width:18,height:18}}/><span style={{fontSize:14,fontWeight:500}}>Active (visible)</span></label></div>
               </div>
               <div style={{paddingTop:20,borderTop:"1px solid var(--border)"}}>
-                <label style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer",marginBottom:12}}><input type="checkbox" checked={!!annForm.sendTelegram} onChange={e=>{const ck=e.target.checked;setAnnForm(p=>{const msg="📢 "+(p.title||"Announcement")+"\n\n"+(p.body||"");return{...p,sendTelegram:ck,telegramMessage:ck?(p.telegramMessage||msg):p.telegramMessage};});}} style={{accentColor:"var(--accent)",width:18,height:18}}/><span style={{fontSize:14,fontWeight:600}}>📢 Send Telegram announcement on save</span></label>
+                <label style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer",marginBottom:12}}><input type="checkbox" checked={!!annForm.sendTelegram} onChange={e=>{const ck=e.target.checked;setAnnForm(p=>{const msg="ð¢ "+(p.title||"Announcement")+"\n\n"+(p.body||"");return{...p,sendTelegram:ck,telegramMessage:ck?(p.telegramMessage||msg):p.telegramMessage};});}} style={{accentColor:"var(--accent)",width:18,height:18}}/><span style={{fontSize:14,fontWeight:600}}>ð¢ Send Telegram announcement on save</span></label>
                 {annForm.sendTelegram&&<textarea value={annForm.telegramMessage||""} onChange={e=>setAnnForm(p=>({...p,telegramMessage:e.target.value}))} rows={5} placeholder="Message to send..." style={{...is,resize:"vertical"}}/>}
               </div>
               <div style={{display:"flex",gap:12,paddingTop:20,borderTop:"1px solid var(--border)"}}>
