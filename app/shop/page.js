@@ -148,6 +148,7 @@ export default function StoreFront() {
             </div>}
             {BULK_DISCOUNTS.length>0&&<p style={{color:"var(--green)",fontSize:12,marginTop:12}}>{BULK_DISCOUNTS.map(d=>d.label).join(" | ")}</p>}
           </div>
+          {announcements.length>0&&<div style={{display:"flex",flexDirection:"column",gap:10,marginBottom:20}}>{announcements.map(a=>(<div key={a.id} style={{background:"linear-gradient(135deg,rgba(108,92,231,.12),rgba(139,92,246,.06))",border:"1px solid var(--accent)",borderRadius:14,padding:"14px 18px"}}><div style={{display:"flex",alignItems:"center",gap:8,fontSize:14,fontWeight:700,color:"var(--accent)"}}><span>*</span><span>{a.title}</span></div><div style={{fontSize:14,color:"var(--text)",whiteSpace:"pre-wrap",lineHeight:1.5,marginTop:4}}>{a.body}</div></div>))}</div>}
           <div style={{display:"flex",flexWrap:"wrap",gap:10,marginBottom:24,alignItems:"center",justifyContent:"space-between"}}>
             <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{CATEGORIES.map(cat=>(<button key={cat} onClick={()=>setCategory(cat)} style={{padding:"8px 16px",borderRadius:10,border:"1px solid "+(category===cat?"var(--accent)":"var(--border)"),background:category===cat?"var(--accent)":"var(--surface)",color:category===cat?"#fff":"var(--muted)",cursor:"pointer",fontSize:13,fontWeight:600}}>{cat}</button>))}</div>
             <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search..." style={{...is,width:200}}/>
