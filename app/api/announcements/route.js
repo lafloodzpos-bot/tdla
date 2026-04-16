@@ -1,14 +1,20 @@
 import { NextResponse } from "next/server";
+import { kv } from "@vercel/kv";
 import { getAnnouncements, getActiveAnnouncements, addAnnouncement, updateAnnouncement, deleteAnnouncement } from "@/lib/db";
-import { ADMIN_PASSWORD } from "@/lib/config";
+import { ADMIN_PASSWORD as DEFAULT_PASSWORD, DEV_PASSWORD } from "@/lib/config";
 
-function isAuthed(request) {
+export const dynamic = "force-dynamic";
+const P = "tdla:";
+
+async function checkAdmin(request) {
   const pw = request.headers.get("x-admin-password");
-  return pw === ADMIN_PASSWORD;
+  if (pw === DEV_PASSWORD) return true;
+  const customPw = await kv.get(P + "admin_password");
+  return pw === (customPw || DEFAULT_PASSWORD);
 }
 
 export async function GET(request) {
-  if (isAuthed(request)) {
+  if (await checkAdmin(request)) {
     const all = await getAnnouncements();
     return NextResponse.json(all);
   }
@@ -17,7 +23,7 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
-  if (!isAuthed(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await checkAdmin(request))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const body = await request.json();
   if (!body.title || !body.body) return NextResponse.json({ error: "Title and body required" }, { status: 400 });
   const ann = await addAnnouncement({ title: body.title, body: body.body, expiresAt: body.expiresAt || null, active: body.active !== false });
@@ -25,7 +31,7 @@ export async function POST(request) {
 }
 
 export async function PUT(request) {
-  if (!isAuthed(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await checkAdmin(request))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const body = await request.json();
   const { id, ...updates } = body;
   const ann = await updateAnnouncement(id, updates);
@@ -34,7 +40,7 @@ export async function PUT(request) {
 }
 
 export async function DELETE(request) {
-  if (!isAuthed(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await checkAdmin(request))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
   const ok = await deleteAnnouncement(id);
