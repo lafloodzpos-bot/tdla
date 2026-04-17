@@ -26,9 +26,11 @@ export default function StoreFront() {
   const [tgLink, setTgLink] = useState("");
   const [sigLink, setSigLink] = useState("");
   const touchStart = useRef(null);
+  const [announcements, setAnnouncements] = useState([]);
 
   useEffect(() => { fetch("/api/products").then(r=>r.json()).then(d=>{d.sort((a,b)=>{const da=a._internalDateAdded||"";const db=b._internalDateAdded||"";return db.localeCompare(da);});setProducts(d);setLoading(false);}).catch(()=>setLoading(false)); }, []);
   useEffect(() => { fetch("/api/links").then(r=>r.json()).then(d=>{setTgLink(d.telegramLink||"");setSigLink(d.signalLink||"");}).catch(()=>{}); }, []);
+  useEffect(() => { fetch("/api/announcements").then(r=>r.json()).then(d=>setAnnouncements(Array.isArray(d)?d:[])).catch(()=>{}); }, []);
   useEffect(() => { document.body.style.overflow=(sel||fsMedia)?"hidden":""; return()=>{document.body.style.overflow="";}; }, [sel,fsMedia]);
   useEffect(() => { setSlide(0); setVideoPlaying(false); }, [sel]);
 
@@ -136,6 +138,7 @@ export default function StoreFront() {
           </div>
         </div>}
         {page==="shop"&&!loading&&<>
+          
           <div style={{textAlign:"center",padding:"40px 20px 32px",background:"radial-gradient(ellipse at 50% 0%,var(--accent-glow) 0%,transparent 70%)",marginBottom:28,borderRadius:20}}>
             <h1 style={{fontFamily:"'Outfit'",fontSize:"clamp(26px,5vw,44px)",fontWeight:800,background:"linear-gradient(135deg,var(--text),var(--accent))",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",marginBottom:10}}>{SITE_TAGLINE}</h1>
             <p style={{color:"var(--muted)",fontSize:15,maxWidth:460,margin:"0 auto"}}>{SITE_DESCRIPTION}</p>
@@ -145,6 +148,7 @@ export default function StoreFront() {
             </div>}
             {BULK_DISCOUNTS.length>0&&<p style={{color:"var(--green)",fontSize:12,marginTop:12}}>{BULK_DISCOUNTS.map(d=>d.label).join(" | ")}</p>}
           </div>
+          {announcements.length>0&&<div style={{display:"flex",flexDirection:"column",gap:10,marginBottom:20}}>{announcements.map(a=>(<div key={a.id} style={{background:"linear-gradient(135deg,rgba(108,92,231,.12),rgba(139,92,246,.06))",border:"1px solid var(--accent)",borderRadius:14,padding:"14px 18px"}}><div style={{display:"flex",alignItems:"center",gap:8,fontSize:14,fontWeight:700,color:"var(--accent)"}}><span>*</span><span>{a.title}</span></div><div style={{fontSize:14,color:"var(--text)",whiteSpace:"pre-wrap",lineHeight:1.5,marginTop:4}}>{a.body}</div></div>))}</div>}
           <div style={{display:"flex",flexWrap:"wrap",gap:10,marginBottom:24,alignItems:"center",justifyContent:"space-between"}}>
             <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{CATEGORIES.map(cat=>(<button key={cat} onClick={()=>setCategory(cat)} style={{padding:"8px 16px",borderRadius:10,border:"1px solid "+(category===cat?"var(--accent)":"var(--border)"),background:category===cat?"var(--accent)":"var(--surface)",color:category===cat?"#fff":"var(--muted)",cursor:"pointer",fontSize:13,fontWeight:600}}>{cat}</button>))}</div>
             <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search..." style={{...is,width:200}}/>
