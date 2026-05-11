@@ -18,6 +18,8 @@ export default function StoreFront() {
   const [hideOOS, setHideOOS] = useState(false);
   const [sortPrice, setSortPrice] = useState("default");
   const [viewMode, setViewMode] = useState("default");
+  const [showTip, setShowTip] = useState(false);
+  useEffect(() => { if(Date.now()>1779128266352)return; try{if(!sessionStorage.getItem("tipSeen")){setShowTip(true);sessionStorage.setItem("tipSeen","1");setTimeout(()=>setShowTip(false),10000);}}catch{} }, []);
   const [shipping, setShipping] = useState("free");
   const [payment, setPayment] = useState("cash");
   const [copied, setCopied] = useState(false);
@@ -102,6 +104,7 @@ export default function StoreFront() {
       </header>
 
       <main style={{maxWidth:1280,margin:"0 auto",padding:"24px 24px 80px"}}>
+        {showTip&&<div style={{position:"fixed",top:0,left:0,right:0,bottom:0,zIndex:300,background:"rgba(0,0,0,.6)",display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>setShowTip(false)}><div onClick={e=>e.stopPropagation()} style={{background:"var(--card)",borderRadius:20,border:"1px solid var(--border)",padding:28,maxWidth:340,width:"100%",textAlign:"center"}}><p style={{fontSize:22,fontWeight:800,marginBottom:16,fontFamily:"'Outfit'"}}>New Features</p><div style={{display:"flex",flexDirection:"column",gap:14,marginBottom:20,textAlign:"left"}}><div style={{display:"flex",gap:10,alignItems:"start"}}><span style={{fontSize:20}}>&#x1F4F1;</span><div><p style={{fontSize:14,fontWeight:600,marginBottom:2}}>Grid View</p><p style={{fontSize:12,color:"var(--muted)"}}>Switch between default and compact grid layouts</p></div></div><div style={{display:"flex",gap:10,alignItems:"start"}}><span style={{fontSize:20}}>&#x1F4B0;</span><div><p style={{fontSize:14,fontWeight:600,marginBottom:2}}>Sort by Price</p><p style={{fontSize:12,color:"var(--muted)"}}>Sort products by price high to low or low to high</p></div></div><div style={{display:"flex",gap:10,alignItems:"start"}}><span style={{fontSize:20}}>&#x1F6D2;</span><div><p style={{fontSize:14,fontWeight:600,marginBottom:2}}>Hide Sold Out</p><p style={{fontSize:12,color:"var(--muted)"}}>Filter out sold out items to see only available products</p></div></div></div><button onClick={()=>setShowTip(false)} style={{padding:"12px 32px",borderRadius:12,border:"none",background:"var(--accent)",color:"#fff",fontSize:15,fontWeight:700,cursor:"pointer",width:"100%"}}>Got it!</button></div></div>}
         {loading&&<div style={{textAlign:"center",padding:80,color:"var(--muted)"}}><p>Loading...</p></div>}
 
         {sel&&<div style={{position:"fixed",top:0,left:0,right:0,bottom:0,zIndex:200,background:"rgba(0,0,0,.7)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={()=>setSel(null)}>
