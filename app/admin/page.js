@@ -39,7 +39,7 @@ export default function AdminPanel() {
     const max = nums.length > 0 ? Math.max(...nums) : 0;
     return "TD" + String(max + 1).padStart(5, "0");
   };
-  const startNew = () => { setEditing("new"); setForm({ name:"", sku:getNextSku(), price:"", category:CATEGORIES[1]||"Highs", image:"", video:"", inStock:true, description:"", smellRating:"", strain:"", weight:"", badge:"", dateAdded:todayStr(), dateUpdated:"", salePrice:"", noDiscount:false, _internalDateAdded:new Date().toISOString() }); };
+  const startNew = () => { setEditing("new"); setForm({ name:"", sku:getNextSku(), price:"", category:CATEGORIES[1]||"Highs", image:"", video:"", inStock:true, description:"", smellRating:"", strain:"", weight:"", badge:"NEW", dateAdded:todayStr(), dateUpdated:"", salePrice:"", noDiscount:false, _internalDateAdded:new Date().toISOString() }); };
   const startEdit = (p) => { setEditing(p.id); setForm({...p}); };
   const uploadFile = async (file, field, setU) => { setU(true); try { const blob = await upload(file.name, file, { access:"public", handleUploadUrl:"/api/upload" }); setForm(p=>({...p,[field]:blob.url})); flash((field==="image"?"Photo":"Video")+" uploaded!"); } catch(err) { flash("Upload failed: "+(err.message||""),"error"); } setU(false); };
   const saveProduct = async () => {
