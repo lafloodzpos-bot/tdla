@@ -120,7 +120,7 @@ export default function StoreFront() {
               <p style={{fontSize:10,color:"var(--dim)",fontWeight:600,letterSpacing:".06em"}}>SKU: {sel.sku} - {sel.category}</p>
               <h2 style={{fontSize:16,fontWeight:700,marginTop:2,marginBottom:4}}>{sel.name}</h2>
               <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
-                {sel.salePrice?<><span style={{fontFamily:"'Outfit'",fontSize:14,textDecoration:"line-through",color:"var(--dim)"}}>{fmt(sel.price)}</span><span style={{fontFamily:"'Outfit'",fontSize:20,fontWeight:800,color:"var(--red)"}}>{fmt(sel.salePrice)}</span></>:<span style={{fontFamily:"'Outfit'",fontSize:20,fontWeight:800,color:"var(--accent)"}}>{fmt(sel.price)}</span>}
+                {sel.salePrice?<><span style={{fontFamily:"'Outfit'",fontSize:14,textDecoration:"line-through",color:"var(--dim)"}}>{fmt(sel.price)}</span><span style={{fontFamily:"'Outfit'",fontSize:20,fontWeight:800,color:"var(--red)"}}>{fmt(sel.salePrice)}</span></>:<span style={{fontFamily:"'Outfit'",fontSize:20,fontWeight:800,color:"#fff"}}>{fmt(sel.price)}</span>}
                 {sel.inStock===false&&<span style={{background:"var(--red)",color:"#fff",padding:"2px 10px",borderRadius:6,fontSize:11,fontWeight:700}}>SOLD OUT</span>}
               </div>
               {sel.noDiscount&&<p style={{fontSize:10,color:"var(--dim)",marginTop:4,background:"var(--surface)",display:"inline-block",padding:"2px 8px",borderRadius:4,border:"1px solid var(--border)"}}>No additional discounts apply</p>}
@@ -166,7 +166,7 @@ export default function StoreFront() {
               <div style={{padding:"14px 16px 16px"}}><p style={{fontSize:10,color:"var(--dim)",fontWeight:600,letterSpacing:".06em",marginBottom:3}}>SKU: {product.sku}</p><h3 style={{fontSize:14,fontWeight:600,marginBottom:4,lineHeight:1.3,minHeight:36}}>{product.name}</h3>
                 {product.noDiscount&&<p style={{fontSize:9,color:"var(--dim)",marginBottom:4}}>No additional discounts</p>}
                 <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-                  <span style={{fontFamily:"'Outfit'",fontWeight:700,color:"var(--accent)"}}>{product.salePrice?<><span style={{fontSize:14,textDecoration:"line-through",color:"var(--dim)",marginRight:4}}>{fmt(product.price)}</span><span style={{fontSize:20,color:"var(--red)"}}>{fmt(product.salePrice)}</span></>:<span style={{fontSize:20}}>{fmt(product.price)}</span>}</span>
+                  <span style={{fontFamily:"'Outfit'",fontWeight:700,color:"#fff"}}>{product.salePrice?<><span style={{fontSize:14,textDecoration:"line-through",color:"var(--dim)",marginRight:4}}>{fmt(product.price)}</span><span style={{fontSize:20,color:"var(--red)"}}>{fmt(product.salePrice)}</span></>:<span style={{fontSize:20}}>{fmt(product.price)}</span>}</span>
                   <button onClick={e=>{e.stopPropagation();inS&&addToCart(product);}} style={{padding:"8px 16px",borderRadius:10,border:"none",background:inS?"linear-gradient(135deg,var(--accent),#8b5cf6)":"var(--border)",color:"#fff",fontSize:12,fontWeight:600,cursor:inS?"pointer":"default"}}>{!inS?"Sold Out":addedId===product.id?"Added!":"Add to Cart"}</button>
                 </div>
               </div>
