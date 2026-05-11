@@ -59,18 +59,17 @@ export default function StoreFront() {
   const handleSwipeEnd = (e, hasV, hasI) => { if(!touchStart.current)return; const diff=touchStart.current-e.changedTouches[0].clientX; if(Math.abs(diff)>50){if(diff>0&&hasV&&slide===0)setSlide(1);if(diff<0&&hasI&&slide===1)setSlide(0);} touchStart.current=null; };
 
   const orderText = () => {
+    var totalDiscount = 0;
     const items = cart.map(i=>{
       const ep = getPrice(i);
-      let label = i.qty+"-"+i.name+" ("+po.label+") [SKU: "+i.sku+"] ["+fmt(ep);
-      if(i.salePrice) label+=" SALE";
-      if(bulkDiscount>0&&!i.noDiscount) label+=" -"+fmt(bulkDiscount)+" disc";
-      label+="]="+fmt(ep*i.qty);
+      let label = i.qty+" x "+i.name+" ("+fmt(ep)+")";
+      if(i.salePrice) label+=" [Sale]";
+      if(bulkDiscount>0&&!i.noDiscount){ label+=" [Discounted -"+fmt(bulkDiscount)+"]"; totalDiscount+=bulkDiscount*i.qty; }
       return label;
     }).join("\n");
-    let text = "ORDER REQUEST\n\nITEMS:\n"+items+"\n\nORDER SUMMARY\n-------------\nTotal Items: "+cc+"\nSubtotal: "+fmt(sub)+"\nShipping ("+so.label+"): "+fmt(so.price)+"\nPayment: "+po.label+"\nTotal due = "+fmt(tot)+"\n"+(shipping==="free"?"FREE SHIPPING (UPS 2 Day Air / USPS Priority)":"OVERNIGHT NEXT DAY SHIPPING (+$50)")+"\nOrder Number: "+genOrderNum();
-    if(bulkLabel) text+="\n\nBULK DISCOUNT APPLIED: "+bulkLabel;
-    text+="\n\nShipping address will be collected after payment is processed.";
-    text+="\n\nNOTE: This total is not final. Please message us to confirm the total. This is just an estimate.";
+    let text = "ORDER REQUEST\n\n"+items+"\n\nTotal Items: "+cc+"\n"+(shipping==="free"?"Free Shipping":"Overnight: + "+fmt(so.price))+"\n";
+    if(totalDiscount>0) text+="Discount: - "+fmt(totalDiscount)+"\n";
+    text+="TOTAL: "+fmt(tot)+"\n\nPaying with "+po.label.toUpperCase()+"\n\nShipping Address will be collected after payment.\nNOTE: This order is not final. This is an estimate. Please confirm the order with us first.";
     return text;
   };
   const copyOrd = async () => { try{await navigator.clipboard.writeText(orderText());}catch{const t=document.createElement("textarea");t.value=orderText();document.body.appendChild(t);t.select();document.execCommand("copy");document.body.removeChild(t);} setCopied(true);setTimeout(()=>setCopied(false),3000); };
