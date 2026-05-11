@@ -204,7 +204,7 @@ export default function StoreFront() {
               <h3 style={{fontSize:14,fontWeight:600,marginBottom:16,color:"var(--muted)",textTransform:"uppercase",letterSpacing:".04em"}}>Order Summary</h3>
               {[{l:"Subtotal",v:fmt(sub)},{l:"Shipping ("+so.label+")",v:so.price===0?"FREE":fmt(so.price),c:so.price===0?"var(--green)":null},{l:"Payment Method",v:po.label}].map((r,i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",marginBottom:10,fontSize:14,color:"var(--muted)"}}><span>{r.l}</span><span style={{fontWeight:500,color:r.c||"var(--text)"}}>{r.v}</span></div>))}
               {bulkLabel&&<div style={{display:"flex",justifyContent:"space-between",marginBottom:10,fontSize:14}}><span style={{color:"var(--green)"}}>Bulk Discount</span><span style={{fontWeight:500,color:"var(--green)"}}>{bulkLabel}</span></div>}
-              <div style={{borderTop:"1px solid var(--border)",paddingTop:14,marginTop:8,display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontSize:16,fontWeight:700}}>Total Due</span><span style={{fontFamily:"'Outfit'",fontSize:26,fontWeight:800,color:"var(--accent)"}}>{fmt(tot)}</span></div>
+              <div style={{borderTop:"1px solid var(--border)",paddingTop:14,marginTop:8,display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontSize:16,fontWeight:700}}>Total Due</span><span style={{fontFamily:"'Outfit'",fontSize:26,fontWeight:800,color:"#fff"}}>{fmt(tot)}</span></div>
               <p style={{fontSize:11,color:"var(--dim)",marginTop:8,textAlign:"center"}}>This total is an estimate. Please message us to confirm.</p>
             </div>
             <div style={{display:"flex",flexDirection:"column",gap:12}}>
