@@ -198,7 +198,7 @@ export default function StoreFront() {
             </div>
             <div style={{background:"var(--card)",borderRadius:14,padding:20,border:"1px solid var(--border)",marginBottom:16}}>
               <h3 style={{fontSize:14,fontWeight:600,marginBottom:14,color:"var(--muted)",textTransform:"uppercase",letterSpacing:".04em"}}>Payment Method</h3>
-              <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>{PAYMENT_METHODS.map(opt=>(<button key={opt.id} onClick={()=>setPayment(opt.id)} style={{padding:"10px 22px",borderRadius:10,border:"1px solid "+(payment===opt.id?"var(--accent)":"var(--border)"),background:payment===opt.id?"rgba(108,92,231,.12)":"var(--surface)",color:payment===opt.id?"var(--accent)":"var(--muted)",cursor:"pointer",fontSize:13,fontWeight:600}}>{opt.label}</button>))}</div>
+              <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>{PAYMENT_METHODS.map(opt=>(<button key={opt.id} onClick={()=>setPayment(opt.id)} style={{padding:"10px 22px",borderRadius:10,border:"1px solid "+(payment===opt.id?"var(--accent)":"var(--border)"),background:payment===opt.id?"rgba(108,92,231,.12)":"var(--surface)",color:payment===opt.id?"#fff":"var(--muted)",cursor:"pointer",fontSize:13,fontWeight:600}}>{opt.label}</button>))}</div>
             </div>
             <div style={{background:"var(--card)",borderRadius:14,padding:24,border:"1px solid var(--border)",marginBottom:20}}>
               <h3 style={{fontSize:14,fontWeight:600,marginBottom:16,color:"var(--muted)",textTransform:"uppercase",letterSpacing:".04em"}}>Order Summary</h3>
