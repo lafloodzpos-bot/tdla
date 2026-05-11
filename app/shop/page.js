@@ -15,6 +15,8 @@ export default function StoreFront() {
   const [page, setPage] = useState("shop");
   const [category, setCategory] = useState("All");
   const [search, setSearch] = useState("");
+  const [hideOOS, setHideOOS] = useState(false);
+  const [sortPrice, setSortPrice] = useState("default");
   const [shipping, setShipping] = useState("free");
   const [payment, setPayment] = useState("cash");
   const [copied, setCopied] = useState(false);
@@ -54,7 +56,7 @@ export default function StoreFront() {
   const addToCart = (p) => { setCart(prev=>{const e=prev.find(i=>i.id===p.id);if(e)return prev.map(i=>i.id===p.id?{...i,qty:i.qty+1}:i);return[...prev,{...p,qty:1}];}); setAddedId(p.id); setTimeout(()=>setAddedId(null),1200); };
   const updateQty = (id,d) => setCart(prev=>prev.map(i=>i.id===id?{...i,qty:Math.max(1,i.qty+d)}:i));
   const rmCart = (id) => setCart(prev=>prev.filter(i=>i.id!==id));
-  const filtered = products.filter(p => { if(!p.name)return false; return (category==="All"||p.category===category)&&p.name.toLowerCase().includes(search.toLowerCase()); });
+  const filtered = products.filter(p => { if(!p.name)return false; if(hideOOS&&p.inStock===false)return false; return (category==="All"||p.category===category)&&p.name.toLowerCase().includes(search.toLowerCase()); }).sort((a,b)=>{ if(sortPrice==="low")return (a.salePrice||a.price)-(b.salePrice||b.price); if(sortPrice==="high")return (b.salePrice||b.price)-(a.salePrice||a.price); return 0; });
   const handleSwipe = (e) => { touchStart.current = e.touches[0].clientX; };
   const handleSwipeEnd = (e, hasV, hasI) => { if(!touchStart.current)return; const diff=touchStart.current-e.changedTouches[0].clientX; if(Math.abs(diff)>50){if(diff>0&&hasV&&slide===0)setSlide(1);if(diff<0&&hasI&&slide===1)setSlide(0);} touchStart.current=null; };
 
@@ -151,7 +153,7 @@ export default function StoreFront() {
           {announcements.length>0&&<div style={{display:"flex",flexDirection:"column",gap:10,marginBottom:20}}>{announcements.map(a=>(<div key={a.id} style={{background:"linear-gradient(135deg,rgba(108,92,231,.12),rgba(139,92,246,.06))",border:"1px solid var(--accent)",borderRadius:14,padding:"14px 18px"}}><div style={{display:"flex",alignItems:"center",gap:8,fontSize:14,fontWeight:700,color:"var(--accent)"}}><span>*</span><span>{a.title}</span></div><div style={{fontSize:14,color:"var(--text)",whiteSpace:"pre-wrap",lineHeight:1.5,marginTop:4}}>{a.body}</div></div>))}</div>}
           <div style={{display:"flex",flexWrap:"wrap",gap:10,marginBottom:24,alignItems:"center",justifyContent:"space-between"}}>
             <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{CATEGORIES.map(cat=>(<button key={cat} onClick={()=>setCategory(cat)} style={{padding:"8px 16px",borderRadius:10,border:"1px solid "+(category===cat?"var(--accent)":"var(--border)"),background:category===cat?"var(--accent)":"var(--surface)",color:category===cat?"#fff":"var(--muted)",cursor:"pointer",fontSize:13,fontWeight:600}}>{cat}</button>))}</div>
-            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search..." style={{...is,width:200}}/>
+            <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search..." style={{...is,width:160}}/><select value={sortPrice} onChange={e=>setSortPrice(e.target.value)} style={{...is,width:120,cursor:"pointer"}}><option value="default">Sort</option><option value="low">Price: Low</option><option value="high">Price: High</option></select><label style={{display:"flex",alignItems:"center",gap:6,cursor:"pointer",fontSize:12,color:"var(--muted)",whiteSpace:"nowrap"}}><input type="checkbox" checked={hideOOS} onChange={e=>setHideOOS(e.target.checked)} style={{accentColor:"var(--accent)",width:16,height:16}}/>Hide Sold Out</label></div>
           </div>
           {filtered.length===0&&<div style={{textAlign:"center",padding:60,color:"var(--muted)"}}><p>No products listed yet.</p></div>}
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(240px,1fr))",gap:16}}>
